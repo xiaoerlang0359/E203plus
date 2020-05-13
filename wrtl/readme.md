@@ -1,31 +1,51 @@
 # Ethernet mac  
-### 目录
-#### 一. 主要修改
-#### 二. 注意事项
-#### 三. 使用EMAC外设
-#### 四. 仿真测试
+## 目录
+### 1. 概述
+>#### 1.1 功能概述
+>#### 1.2 总体框图
+### 2. 实现描述
+>#### 2.1 RTL
+>#### 2.2 IP 核
+>#### 2.3 约束文件
+### 3. 仿真测试
+### 4. 设计反思
+### 5. 使用EMAC外设
+
 ---
-## 一. 主要修改
-1. RTL:主要修改的是 [e203_subsys_perips.v](rtl/subsys/e203_subsys_perips.v): E203本身就为扩展AXI核APB外设提供了接口，只需要将EthernetLite IP核实例化，并且完成接口的连线就可以。其中与Phy芯片接口有关的信号，要逐级连接到最顶层 [system.v](rtl/system.v)。AXI接口信号与ICB2AXI模块进行连接。中断信号 ip2intc_irpt 要连接到PLIC模块。同时EMAC外设的对应地址也在  
+## 1. 概述
+### 1.1 功能概述
+为E203 SoC增加了以太网外设，能够实现全双工，10 Mb/s以太网通信。并且增加了以太网的发射和接收中断。
+### 1.2 总体框图
+![project](project.png)
+## 2. 实现描述
+### 2.1 RTL
+主要修改的是 [e203_subsys_perips.v](rtl/subsys/e203_subsys_perips.v): E203本身就为扩展AXI核APB外设提供了接口，只需要将EthernetLite IP核实例化，并且完成接口的连线就可以。其中与Phy芯片接口有关的信号，要逐级连接到最顶层 [system.v](rtl/system.v)。AXI接口信号与ICB2AXI模块进行连接。中断信号 ip2intc_irpt 要连接到PLIC模块。同时EMAC外设的对应地址也在  
 其次就是PLIC模块要增加对应的引脚信号，并且将外部中断的数目增加到53。  
 最后在 [system.v](rtl/system.v)中需要增加给phy芯片的时钟。增加核phy芯片的输入输出接口。其中MDIO信号需要格外注意以下。作为inout端口，我们要在输出端加三态门。  
 ```verilog
 assign eth_mdio = (!phy_mdio_t)? phy_mdio_o:1'bz;
 assign phy_mdio_i = eth_mdio;
 ```
-2. IP核：MMCM IP核需要增加一路输出时钟（25MHz）作为phy芯片的输入时钟，可以直接由 primary clock 在MMCM中生成。  
+### 2.2 IP核
+MMCM IP核需要增加一路输出时钟（25MHz）作为phy芯片的输入时钟，可以直接由 primary clock 在MMCM中生成。  
 增加一个EthernetLite IP核，需要注意的是，如果您想进行环回测试，请使能MDIO和MDC信号。  
 具体IP核如何设置，请参考[TCL_for_IP.txt](IP/TCL_for_IP.txt)中的TCL脚本。
-3. 约束文件：将连接phy芯片应交的物理约束的注释取消。
+### 2.3 约束文件
+将连接phy芯片应交的物理约束的注释取消。
+## 3. 仿真测试
+仿真测试分为三个阶段：  
+1. IP核的行为级仿真。需要注意的是，如果你使用example design对应的仿真文件。并且AXI时钟小于100 MHz时。请在tb文件中修改phy接口的时钟为2.5MHz，否则可能无法测试成功。（Done）
+2. Internal 和 phy芯片级别的环回测试，验证发送接收数据是否一致，并且测试中断功能。具体main函数可以在sim目录下找到。（Running）
+3. 移植FreeRTOS+TCP内核，与上位机的FTP服务器进行通信，能够正常接收文件。（Queue）
 
-## 二. 注意事项
+## 4. 设计反思
 1. phy_mdio_t 为低电平时使能输出，这一点在product guide 中没有提到。
 2. 当AXI接口时钟小于100 MHz 时只能使用 10Mb/s 以太网。如果需要进行环回测试（无论是internal的还是，基于phy芯片的），都需要设置phy芯片的工作模式。
 3. 出于应用场景的需要，目前EMAC 外设只支持全双工模式。
 4. 虽然在原理图中给phy芯片画了对应的晶振，但实际上arty A7-35T的开发板上时没有晶振的，需要自己产生时钟。
 5. 目标开发板中的phy芯片默认地址为0x01
 
-## 三. 使用EMAC外设
+## 5. 使用EMAC外设
 更多使用EMAC的信息请参阅 [product guide](doc/pg135-axi-ethernetlite.pdf)。这里只对最简单的应用场景进行介绍。  
 1. 主要寄存器  
    
@@ -54,10 +74,6 @@ assign phy_mdio_i = eth_mdio;
 
 有关如何操作MDIO接口以及，修改MAC地址的内容，请阅读[product guide](doc/pg135-axi-ethernetlite.pdf)。
 
-## 四. 仿真测试
-仿真测试分为三个阶段：  
-1. IP核的行为级仿真。需要注意的是，如果你使用example design对应的仿真文件。并且AXI时钟小于100 MHz时。请在tb文件中修改phy接口的时钟为2.5MHz，否则可能无法测试成功。（Done）
-2. Internal 和 phy芯片级别的环回测试，验证发送接收数据是否一致，并且测试中断功能。具体main函数可以在sim目录下找到。（Running）
-3. 移植FreeRTOS+TCP内核，与上位机的FTP服务器进行通信，能够正常接收文件。（Queue）
+
 
    

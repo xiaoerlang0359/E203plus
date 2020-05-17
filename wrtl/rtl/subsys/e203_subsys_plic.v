@@ -110,7 +110,7 @@ module e203_subsys_plic(
   input  rst_n
   );
 
-  assign plic_icb_rsp_err     = 1'b0;
+ assign plic_icb_rsp_err     = 1'b0;
 
   wire  wdg_irq_r;
   wire  rtc_irq_r;
@@ -173,7 +173,7 @@ module e203_subsys_plic(
   wire plic_irq_i_35 = gpio_irq_28; 
   wire plic_irq_i_36 = gpio_irq_29; 
   wire plic_irq_i_37 = gpio_irq_30; 
-  wire plic_irq_i_38 = gpio_irq_31; 
+  wire plic_irq_i_38 = ip2intc_irpt; 
   wire plic_irq_i_39 = pwm0_irq_0;
   wire plic_irq_i_40 = pwm0_irq_1;
   wire plic_irq_i_41 = pwm0_irq_2;
@@ -187,7 +187,6 @@ module e203_subsys_plic(
   wire plic_irq_i_49 = pwm2_irq_2;
   wire plic_irq_i_50 = pwm2_irq_3;
   wire plic_irq_i_51 = i2c_mst_irq;
-  wire plic_irq_i_52 = ip2intc_irpt;
                          
 
   sirv_plic_top u_sirv_plic_top(
@@ -256,9 +255,10 @@ module e203_subsys_plic(
     .io_devices_0_49 (plic_irq_i_49),
     .io_devices_0_50 (plic_irq_i_50),
     .io_devices_0_51 (plic_irq_i_51),
-    .io_devices_0_52 (plic_irq_i_52),
     .io_harts_0_0    (plic_ext_irq ) 
   );
 
   endmodule
+
+
 

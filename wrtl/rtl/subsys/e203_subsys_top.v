@@ -455,7 +455,8 @@ module e203_subsys_top(
     output phy_mdc,
     ////////////////////////////////////
     output expl_axi_icb_cmd_valid,
-
+    output ip2intc_irpt,
+    output plic_ext_irq,
   input  test_iso_override,
   input  test_mode 
   );
@@ -913,6 +914,8 @@ module e203_subsys_top(
     .phy_mdio_t(phy_mdio_t),
     .phy_mdc(phy_mdc),
     .expl_axi_icb_cmd_valid(expl_axi_icb_cmd_valid),
+    .ip2intc_irpt(ip2intc_irpt),
+    .plic_ext_irq(plic_ext_irq),
 
     .test_mode     (test_mode), 
     .hfclk           (hfclk   ),

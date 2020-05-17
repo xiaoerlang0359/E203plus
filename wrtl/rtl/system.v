@@ -87,6 +87,8 @@ module system
   wire mmcm_locked;
 
   wire reset_periph;
+  wire ip2intc_irpt;
+  wire plic_ext_irq;
 
   // All wires connected to the chip top
   wire dut_clock;
@@ -374,11 +376,8 @@ module system
   wire expl_axi_icb_cmd_valid;
   ila_0 u_ila_0(
     .clk(CLK100MHZ),
-    .probe0(phy_mdio_o),
-    .probe1(eth_tx_clk),
-    .probe2(eth_mdio),
-    .probe3(eth_mdc),
-    .probe4(phy_mdio_t));
+    .probe0(ip2intc_irpt),
+    .probe1(plic_ext_irq));
 
   //=================================================
   // SPI Interface
@@ -1373,6 +1372,8 @@ module system
     .phy_mdio_t(phy_mdio_t),
     .phy_mdc(eth_mdc),
     .expl_axi_icb_cmd_valid(expl_axi_icb_cmd_valid),
+    .ip2intc_irpt(ip2intc_irpt),
+    .plic_ext_irq(plic_ext_irq),
 
     // Many people dont know how to control these pins, so just tie them to 1
     .io_pads_bootrom_n_i_ival        (1'b1),

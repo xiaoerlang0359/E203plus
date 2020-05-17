@@ -449,7 +449,8 @@ module e203_subsys_main(
     output phy_mdc,
     ////////////////////////////////////
     output expl_axi_icb_cmd_valid,
-
+    output ip2intc_irpt,
+    output plic_ext_irq,
   input  test_mode,
 
   input  corerst, // The original async reset
@@ -458,7 +459,7 @@ module e203_subsys_main(
   output hfclk // The generated clock by HCLKGEN
 
   );
- wire ip2intc_irpt;
+// wire ip2intc_irpt;
  wire [31:0] inspect_pc;
  wire inspect_mem_cmd_valid;
  wire inspect_mem_cmd_ready;

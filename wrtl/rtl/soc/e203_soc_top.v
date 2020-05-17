@@ -293,6 +293,8 @@ module e203_soc_top(
     output phy_mdc,
     ////////////////////////////////////
     output expl_axi_icb_cmd_valid,
+    output ip2intc_irpt,
+    output plic_ext_irq,
 
 
   // dwakeup is input need to be pull-up by default
@@ -741,6 +743,8 @@ module e203_soc_top(
     .phy_mdio_t(phy_mdio_t),
     .phy_mdc(phy_mdc),
     .expl_axi_icb_cmd_valid(expl_axi_icb_cmd_valid),
+    .ip2intc_irpt(ip2intc_irpt),
+    .plic_ext_irq(plic_ext_irq),
 
     .io_pads_dbgmode0_n_i_ival       (io_pads_dbgmode0_n_i_ival),
 
